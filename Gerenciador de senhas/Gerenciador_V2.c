@@ -61,7 +61,7 @@ int main() {
                 system(CLEAR_COMMAND);
                 int respVS=0;
                 printf("Deseja ver todas as senhas ou senha especifica\n");
-                printf("1-Todas, 2-Especifica");
+                printf("1-Todas, 2-Especifica: ");
                 scanf("%d", &respVS);
                 switch(respVS) {
                     case 1: {
@@ -73,6 +73,36 @@ int main() {
                             printf("\nUsuario: %s", temp.usuario);
                             printf("\nSenha: %s\n", temp.senha);
                         }
+                        break;
+                    }
+                    case 2: {
+                        
+                        printf("SENHAS SALVAS\n");
+                        rewind(arquivo); //VOLTA PAR O INICIO DO ARQUIVO
+                        GerenciadorSenhas temp;
+                        printf("\n=== SENHAS SALVAS ===\n");
+        
+                        while(fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo)) {
+                            printf("\nServico: %s", temp.servico);
+                        }
+                        
+                        char ver_senha[TAM];
+                        
+                        printf("\n\nDigite o nome do servico que deseja ver a senha: ");
+                        scanf(" %49[^\n]", ver_senha);
+        
+                        rewind(arquivo);
+                        system(CLEAR_COMMAND);
+                        while(fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo)) {
+        
+                            if(strcmp(temp.servico, ver_senha) == 0) {
+                                
+                                printf("\nServico: %s", temp.servico);
+                                printf("\nUsuario: %s", temp.usuario);
+                                printf("\nSenha: %s\n", temp.senha);
+                            }
+                        }
+                        
                         break;
                     }
                 }
