@@ -63,7 +63,6 @@ void MostrarRegistros (GerenciadorSenhas senha)
 }
 
 /* ===================== CADASTRO ===================== */
-
 void cadastrarSenhas (FILE *arquivo)
 {
 GerenciadorSenhas senha;
@@ -108,7 +107,6 @@ while (continuar)
 }
 
 /* ===================== CONSULTA ===================== */
-
 void listarTodas(FILE *arquivo)
 {
     GerenciadorSenhas temp;
@@ -187,7 +185,6 @@ void visualizarSenhas(FILE *arquivo)
 }
 
 /* ===================== EXCLUSÃO ===================== */
-
 FILE *deletarSenha(FILE *arquivo)
 {
     FILE *tempFile;
@@ -207,10 +204,7 @@ FILE *deletarSenha(FILE *arquivo)
 
     printf("\n=== SERVICOS CADASTRADOS ===\n");
 
-    while (fread(&temp,
-                 sizeof(GerenciadorSenhas),
-                 1,
-                 arquivo))
+    while (fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo))
     {
         printf("- %s\n", temp.servico);
     }
@@ -220,17 +214,11 @@ FILE *deletarSenha(FILE *arquivo)
 
     rewind(arquivo);
 
-    while (fread(&temp,
-                 sizeof(GerenciadorSenhas),
-                 1,
-                 arquivo))
+    while (fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo))
     {
         if (strcmp(temp.servico, deletar) != 0)
         {
-            fwrite(&temp,
-                   sizeof(GerenciadorSenhas),
-                   1,
-                   tempFile);
+            fwrite(&temp, sizeof(GerenciadorSenhas), 1, tempFile);
         }
         else
         {
@@ -259,7 +247,6 @@ FILE *deletarSenha(FILE *arquivo)
 }
 
 /* ===================== MAIN ===================== */
-
 int main()
 {
     iniciarSistema();
