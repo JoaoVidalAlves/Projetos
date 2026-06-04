@@ -90,6 +90,8 @@ while (continuar)
 
         fflush(arquivo);
 
+        memset(&senha, 0, sizeof(GerenciadorSenhas));
+
         printf("\nSenha cadastrada com sucesso!\n");
 
         do
@@ -124,6 +126,9 @@ void listarTodas(FILE *arquivo)
     {
         MostrarRegistros(temp);
     }
+
+    memset(&temp, 0, sizeof(temp));
+
 }
 
 void listarEspecifica(FILE *arquivo)
@@ -160,6 +165,9 @@ void listarEspecifica(FILE *arquivo)
     {
         printf("\nServico nao encontrado.\n");
     }
+
+    memset(&temp, 0, sizeof(temp));
+    memset(busca, 0, sizeof(busca));
 }
 
 void visualizarSenhas(FILE *arquivo)
@@ -277,22 +285,16 @@ void criptografarArquivo(FILE *arquivo, char chave[])
 
         criptografarStruct(&temp, chave);
 
-        fseek(
-            arquivo,
-            posicao - sizeof(GerenciadorSenhas),
-            SEEK_SET
-        );
+        fseek(arquivo, posicao - sizeof(GerenciadorSenhas), SEEK_SET);
 
         fwrite(&temp,sizeof(GerenciadorSenhas),1,arquivo);
 
         fflush(arquivo);
 
-        fseek(
-            arquivo,
-            posicao,
-            SEEK_SET
-        );
+        fseek(arquivo, posicao, SEEK_SET);
     }
+
+    memset(&temp, 0, sizeof(temp));
 
     rewind(arquivo);
 }
@@ -323,6 +325,8 @@ int main()
         {
         case 1:
             criptografarArquivo(arquivo, senhaMestra);
+
+            memset(senhaMestra, 0, sizeof(senhaMestra));
 
             fclose(arquivo);
 
