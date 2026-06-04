@@ -17,6 +17,11 @@ typedef struct GerenciadorSenhas
     char senha[TAM];
 } GerenciadorSenhas;
 
+typedef struct Verificacao
+{
+    char assinatura[10];
+} Verificacao;
+
 /* ===================== SISTEMA ===================== */
 void iniciarSistema () 
 {
@@ -68,7 +73,7 @@ void MostrarRegistros (GerenciadorSenhas senha)
 }
 
 /* ===================== CADASTRO ===================== */
-void cadastrarSenhas (FILE *arquivo)
+void cadastrarSenhas(FILE *arquivo, char senhaMestra[])
 {
 GerenciadorSenhas senha;
 int continuar = 1;
@@ -86,13 +91,15 @@ while (continuar)
         printf("Digite a senha: ");
         scanf(" %49[^\n]", senha.senha);
 
-        fwrite(&senha, sizeof(GerenciadorSenhas), 1, arquivo);
+        criptografarStruct(&senha, senhaMestra);
 
-        fflush(arquivo);
+        fwrite(&senha,sizeof(GerenciadorSenhas),1,arquivo);
 
         memset(&senha, 0, sizeof(GerenciadorSenhas));
 
         printf("\nSenha cadastrada com sucesso!\n");
+
+        memset(&senha,0,sizeof(senha));
 
         do
         {
@@ -114,24 +121,30 @@ while (continuar)
 }
 
 /* ===================== CONSULTA ===================== */
-void listarTodas(FILE *arquivo)
+void listarTodas(FILE *arquivo, char senhaMestra[])
 {
     GerenciadorSenhas temp;
 
     rewind(arquivo);
 
+    fseek(arquivo,sizeof(Verificacao),SEEK_SET);
+
     printf("\n=== SENHAS SALVAS ===\n");
 
-    while (fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo))
+    while (fread(&temp,sizeof(GerenciadorSenhas),1,arquivo))
     {
+        criptografarStruct(&temp,senhaMestra);
+
         MostrarRegistros(temp);
+
+        memset(&temp,0,sizeof(temp));
     }
 
     memset(&temp, 0, sizeof(temp));
 
 }
 
-void listarEspecifica(FILE *arquivo)
+void listarEspecifica(FILE *arquivo, char senhaMestra[])
 {
     GerenciadorSenhas temp;
     char busca[TAM];
@@ -139,11 +152,17 @@ void listarEspecifica(FILE *arquivo)
 
     rewind(arquivo);
 
+    fseek(arquivo,sizeof(Verificacao),SEEK_SET);
+
     printf("\n=== SERVICOS CADASTRADOS ===\n");
 
-    while (fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo))
+    while(fread(&temp,sizeof(GerenciadorSenhas),1,arquivo))
     {
-        printf("- %s\n", temp.servico);
+        criptografarStruct(&temp,senhaMestra);
+
+        printf("- %s\n",temp.servico);
+
+        memset(&temp,0,sizeof(temp));
     }
 
     printf("\nDigite o serviço: ");
@@ -151,9 +170,13 @@ void listarEspecifica(FILE *arquivo)
 
     rewind(arquivo);
 
-    while (fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo))
+    fseek(arquivo,sizeof(Verificacao),SEEK_SET);
+
+    while(fread(&temp,sizeof(GerenciadorSenhas),1,arquivo))
     {
-        if (strcmp(temp.servico, busca) == 0)
+        criptografarStruct(&temp,senhaMestra);
+
+        if(strcmp(temp.servico,busca)==0)
         {
             MostrarRegistros(temp);
             encontrada = 1;
@@ -170,7 +193,7 @@ void listarEspecifica(FILE *arquivo)
     memset(busca, 0, sizeof(busca));
 }
 
-void visualizarSenhas(FILE *arquivo)
+void visualizarSenhas(FILE *arquivo, char senhaMestra[])
 {
     int opcao;
 
@@ -185,11 +208,11 @@ void visualizarSenhas(FILE *arquivo)
     switch (opcao)
     {
     case 1:
-        listarTodas(arquivo);
+        listarTodas(arquivo,senhaMestra);
         break;
 
     case 2:
-        listarEspecifica(arquivo);
+        listarEspecifica(arquivo,senhaMestra);
         break;
 
     default:
@@ -198,7 +221,7 @@ void visualizarSenhas(FILE *arquivo)
 }
 
 /* ===================== EXCLUSÃO ===================== */
-FILE *deletarSenha(FILE *arquivo)
+FILE *deletarSenha(FILE *arquivo, char senhaMestra[])
 {
     FILE *tempFile;
     GerenciadorSenhas temp;
@@ -215,11 +238,23 @@ FILE *deletarSenha(FILE *arquivo)
 
     rewind(arquivo);
 
+    Verificacao ver;
+
+    fread(&ver,sizeof(ver),1,arquivo);
+
+    fwrite(&ver,sizeof(ver),1,tempFile);
+
+    fseek(arquivo,sizeof(Verificacao),SEEK_SET);
+
     printf("\n=== SERVICOS CADASTRADOS ===\n");
 
-    while (fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo))
+    while(fread(&temp,sizeof(GerenciadorSenhas),1,arquivo))
     {
-        printf("- %s\n", temp.servico);
+        criptografarStruct(&temp,senhaMestra);
+
+        printf("- %s\n",temp.servico);
+
+        memset(&temp,0,sizeof(temp));
     }
 
     printf("\nDigite o serviço que deseja remover: ");
@@ -227,11 +262,17 @@ FILE *deletarSenha(FILE *arquivo)
 
     rewind(arquivo);
 
+    fseek(arquivo,sizeof(Verificacao),SEEK_SET);
+
     while (fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo))
     {
-        if (strcmp(temp.servico, deletar) != 0)
+        GerenciadorSenhas copia=temp;
+
+        criptografarStruct(&copia,senhaMestra);
+
+        if(strcmp(copia.servico,deletar)!=0)
         {
-            fwrite(&temp, sizeof(GerenciadorSenhas), 1, tempFile);
+            fwrite(&temp,sizeof(temp),1,tempFile);
         }
         else
         {
@@ -260,45 +301,58 @@ FILE *deletarSenha(FILE *arquivo)
 }
 
 /* =================== CRIPTOGRAFIA =================== */
+void criptografarTexto(char texto[], char chave[])
+{
+    int tamanhoTexto=strlen(texto);
+
+    int tamanhoChave=strlen(chave);
+
+    if(tamanhoChave==0)
+        return;
+
+    for(int i=0;i<tamanhoTexto;i++)
+    {
+        texto[i]^=chave[i%tamanhoChave];
+    }
+}
+
 void criptografarStruct(GerenciadorSenhas *dados, char chave[])
 {
-    unsigned char *ptr = (unsigned char*)dados;
+    criptografarTexto(dados->servico,chave);
 
-    int tamanho = sizeof(GerenciadorSenhas);
-    int tamanhoChave = strlen(chave);
+    criptografarTexto(dados->usuario,chave);
 
-    for(int i = 0; i < tamanho; i++)
-    {
-        ptr[i] ^= chave[i % tamanhoChave];
-    }
+    criptografarTexto(dados->senha,chave);
 }
 
-void criptografarArquivo(FILE *arquivo, char chave[])
+int validarSenhaMestra(FILE *arquivo, char senhaMestra[])
 {
-    GerenciadorSenhas temp;
+    Verificacao ver;
 
     rewind(arquivo);
 
-    while(fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo))
+    if(fread(&ver,sizeof(ver),1,arquivo)==0)
     {
-        long posicao = ftell(arquivo);
+        strcpy(ver.assinatura,"VALIDO");
 
-        criptografarStruct(&temp, chave);
+        criptografarTexto(ver.assinatura,senhaMestra);
 
-        fseek(arquivo, posicao - sizeof(GerenciadorSenhas), SEEK_SET);
+        rewind(arquivo);
 
-        fwrite(&temp,sizeof(GerenciadorSenhas),1,arquivo);
+        fwrite(&ver,sizeof(ver),1,arquivo);
 
-        fflush(arquivo);
-
-        fseek(arquivo, posicao, SEEK_SET);
+        return 1;
     }
 
-    memset(&temp, 0, sizeof(temp));
+    criptografarTexto(ver.assinatura,senhaMestra);
 
-    rewind(arquivo);
+    if(strcmp(ver.assinatura,"VALIDO")!=0)
+    {
+        return 0;
+    }
+
+    return 1;
 }
-
 /* ======================= MAIN ======================= */
 int main()
 {
@@ -308,14 +362,31 @@ int main()
 
     char senhaMestra[TAM];
 
-    printf("Digite a senha mestra: ");
-    scanf(" %49[^\n]", senhaMestra);
+    do
+    {
+        printf("Digite a senha mestra: ");
 
-    criptografarArquivo(arquivo, senhaMestra);
+        scanf(" %49[^\n]", senhaMestra);
+
+    }while(strlen(senhaMestra)==0);
+
+
+    if(!validarSenhaMestra(arquivo,senhaMestra))
+    {
+        printf("Senha incorreta!\n");
+
+        fclose(arquivo);
+
+        return 1;
+    }
 
     int opcao;
 
-    while (1)
+    int continuar=1;
+
+    fseek(arquivo,0,SEEK_END);
+
+    while(continuar)
     {
         Menu();
 
@@ -324,7 +395,6 @@ int main()
         switch (opcao)
         {
         case 1:
-            criptografarArquivo(arquivo, senhaMestra);
 
             memset(senhaMestra, 0, sizeof(senhaMestra));
 
@@ -335,16 +405,16 @@ int main()
             return 0;
         case 2:
             limparTela();
-            visualizarSenhas(arquivo);
+            visualizarSenhas(arquivo,senhaMestra);
             break;
 
         case 3:
             limparTela();
-            arquivo = deletarSenha(arquivo);
+            arquivo = deletarSenha(arquivo,senhaMestra);
             break;
 
         case 4:
-            cadastrarSenhas(arquivo);
+            cadastrarSenhas(arquivo,senhaMestra);
             break;
 
         default:
