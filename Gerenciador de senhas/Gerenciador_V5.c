@@ -2,14 +2,30 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include <ctype.h>
+
+/* =========== TAMANHO MAXIMO DE STRINGS ============ */
 #define TAM 50
 
+/* ================= MACROS DE COR ================== */
+#define RESET   "\033[0m"
+#define PRETO   "\033[30m"
+#define VERMELHO "\033[31m"
+#define VERDE   "\033[32m"
+#define AMARELO "\033[33m"
+#define AZUL    "\033[34m"
+#define MAGENTA "\033[35m"
+#define CIANO   "\033[36m"
+#define BRANCO  "\033[37m"
+
+/* ============== MACRO LIMPAR TELA ================= */
 #ifdef _WIN32
 #define CLEAR_COMMAND "cls"
 #else
 #define CLEAR_COMMAND "clear"
 #endif
 
+/* ==================== INICIO ======================= */
 typedef struct GerenciadorSenhas
 {
     char servico[TAM];
@@ -19,12 +35,59 @@ typedef struct GerenciadorSenhas
 
 typedef struct Verificacao
 {
-    char assinatura[10];
+    char assinatura[TAM];
 } Verificacao;
 
 void criptografarTexto(char texto[], char chave[]);
 void criptografarStruct(GerenciadorSenhas *dados, char chave[]);
 int validarSenhaMestra(FILE *arquivo, char senhaMestra[]);
+
+/* ================= VALIDAR NUMERO ================== */
+int validarNumero(char entrada[]) {
+
+    int i = 0;
+
+    if(entrada[0] == '-')
+        i++;
+
+    if(entrada[i] == '\0')
+        return -1;
+
+    for(; entrada[i] != '\0'; i++) {
+
+        if(!isdigit(entrada[i])) {
+            return -1;
+        }
+    }
+
+    return atoi(entrada);
+}
+
+int lerOpcao(int minimo, int maximo)
+{
+    char entrada[10];
+    int opcao;
+
+        scanf(" %9s", entrada);
+
+        opcao = validarNumero(entrada);
+
+        if (opcao >= minimo && opcao <= maximo)
+        {
+            return opcao;
+        }
+        else
+        {
+            printf(VERMELHO "\nOpção Invalida\n" RESET);
+            return -1;
+        }
+    
+}
+
+void limparBuffer() {
+    char c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
 
 /* ===================== SISTEMA ===================== */
 void iniciarSistema () 
@@ -80,11 +143,12 @@ void MostrarRegistros (GerenciadorSenhas senha)
 void cadastrarSenhas(FILE *arquivo, char senhaMestra[])
 {
 GerenciadorSenhas senha;
-int continuar = 1;
+int Icontinuar = 1;
 
-while (continuar)
+while (Icontinuar)
     {
         limparTela();
+        fseek(arquivo, 0, SEEK_END);
 
         printf("Digite o serviço: ");
         scanf(" %49[^\n]", senha.servico);
@@ -113,14 +177,10 @@ while (continuar)
             printf("\n0 - Não");
             printf("\nSelecione: ");
 
-            scanf("%d", &continuar);
+            Icontinuar = lerOpcao(0, 1);
 
-            if (continuar != 0 && continuar != 1)
-            {
-                printf("\nOpcao invalida!\n");
-            }
-
-        } while (continuar != 0 && continuar != 1);
+        } while (Icontinuar < 0 || Icontinuar > 1);
+        
         limparTela();
     }
 }
@@ -134,7 +194,7 @@ void listarTodas(FILE *arquivo, char senhaMestra[])
 
     fseek(arquivo,sizeof(Verificacao),SEEK_SET);
 
-    printf("\n=== SENHAS SALVAS ===\n");
+    printf(VERDE "\n=== SENHAS SALVAS ===\n" RESET);
 
     while (fread(&temp,sizeof(GerenciadorSenhas),1,arquivo))
     {
@@ -159,7 +219,7 @@ void listarEspecifica(FILE *arquivo, char senhaMestra[])
 
     fseek(arquivo,sizeof(Verificacao),SEEK_SET);
 
-    printf("\n=== SERVICOS CADASTRADOS ===\n");
+    printf(VERDE "\n=== SERVICOS CADASTRADOS ===\n" RESET);
 
     while(fread(&temp,sizeof(GerenciadorSenhas),1,arquivo))
     {
@@ -191,7 +251,7 @@ void listarEspecifica(FILE *arquivo, char senhaMestra[])
 
     if (!encontrada)
     {
-        printf("\nServico nao encontrado.\n");
+        printf(VERMELHO "\nServico nao encontrado.\n" RESET);
     }
 
     memset(&temp, 0, sizeof(temp));
@@ -202,11 +262,15 @@ void visualizarSenhas(FILE *arquivo, char senhaMestra[])
 {
     int opcao;
 
-    printf("\n1 - Todas");
-    printf("\n2 - Especifica");
-    printf("\nSelecione: ");
+    do
+    {
+        printf("\n1 - Todas");
+        printf("\n2 - Especifica");
+        printf("\nSelecione: ");
 
-    scanf("%d", &opcao);
+        opcao = lerOpcao(1, 2);
+
+    } while (opcao < 1 || opcao > 2);
 
     limparTela();
 
@@ -251,7 +315,7 @@ FILE *deletarSenha(FILE *arquivo, char senhaMestra[])
 
     fseek(arquivo,sizeof(Verificacao),SEEK_SET);
 
-    printf("\n=== SERVICOS CADASTRADOS ===\n");
+    printf(VERDE "\n=== SERVICOS CADASTRADOS ===\n" RESET);
 
     while(fread(&temp,sizeof(GerenciadorSenhas),1,arquivo))
     {
@@ -295,11 +359,11 @@ FILE *deletarSenha(FILE *arquivo, char senhaMestra[])
 
     if (encontrada)
     {
-        printf("\nSenha removida com sucesso!\n");
+        printf(VERDE "\nSenha removida com sucesso!\n" RESET);
     }
     else
     {
-        printf("\nServico nao encontrado.\n");
+        printf(VERMELHO "\nServico nao encontrado.\n" RESET);
     }
 
     return arquivo;
@@ -384,19 +448,33 @@ int main()
         return 1;
     }
 
-    int opcao;
-
+    char opcao[2];
+    int Nopcao=0;
     int continuar=1;
 
     fseek(arquivo,0,SEEK_END);
-
+    
+    limparTela();
+    
     while(continuar)
     {
-        Menu();
-
-        scanf("%d", &opcao);
-
-        switch (opcao)
+        do
+        {
+            Menu();
+            
+            scanf(" %1s", opcao);
+            Nopcao = validarNumero(opcao);
+        
+            if(Nopcao < 1 || Nopcao > 4)
+            {
+                limparTela();
+                printf("Opcao invalida!\n");
+                continue;
+            }
+            limparTela();
+        } while (Nopcao < 1 || Nopcao > 4);
+        
+        switch (Nopcao)
         {
         case 1:
 
