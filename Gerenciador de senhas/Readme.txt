@@ -1,1 +1,1 @@
-Gerenciador de senhas - Criar, deletar e ver senhas.
+Gerenciador de senhas - Criar, deletar, ver senhas e criptografar em XOR.
