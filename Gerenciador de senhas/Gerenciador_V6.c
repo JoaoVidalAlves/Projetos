@@ -120,9 +120,16 @@ FILE *abrirArquivo()
     return arquivo;
 }
 
+void continuarTela()
+{
+    printf("\n");
+    system("pause");
+    limparTela();
+}
 /* ===================== EXIBIÇÃO ===================== */
 void Menu() 
-{
+{   
+    printf("\n");
     printf("   MENU");
     printf("\n---------------------");
     printf("\n 1 - Sair");
@@ -481,7 +488,7 @@ int main()
         return 1;
     }
 
-    char opcao[2];
+    char opcao[50];
     int Nopcao=0;
     int continuar=1;
 
@@ -495,7 +502,7 @@ int main()
         {
             Menu();
             
-            scanf(" %1s", opcao);
+            scanf(" %49s", opcao);
             Nopcao = validarNumero(opcao);
         
             if(Nopcao < 1 || Nopcao > 4)
@@ -521,11 +528,13 @@ int main()
         case 2:
             limparTela();
             visualizarSenhas(arquivo,senhaMestra);
+            continuarTela();
             break;
 
         case 3:
             limparTela();
             arquivo = deletarSenha(arquivo,senhaMestra);
+            continuarTela();
             break;
 
         case 4:
