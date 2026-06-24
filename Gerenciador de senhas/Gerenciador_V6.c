@@ -140,6 +140,29 @@ void MostrarRegistros (GerenciadorSenhas senha)
 }
 
 /* ===================== CADASTRO ===================== */
+int servicoJaCadastrado(FILE *arquivo, char senhaMestra[], char servico[])
+{
+    GerenciadorSenhas temp;
+
+    rewind(arquivo);
+    fseek(arquivo, sizeof(Verificacao), SEEK_SET);
+
+    while (fread(&temp, sizeof(GerenciadorSenhas), 1, arquivo))
+    {
+        criptografarStruct(&temp, senhaMestra);
+
+        if (strcmp(temp.servico, servico) == 0)
+        {
+            memset(&temp, 0, sizeof(temp));
+            return 1;
+        }
+
+        memset(&temp, 0, sizeof(temp));
+    }
+
+    return 0;
+}
+
 void cadastrarSenhas(FILE *arquivo, char senhaMestra[])
 {
 GerenciadorSenhas senha;
@@ -152,7 +175,16 @@ while (Icontinuar)
 
         printf("Digite o serviço: ");
         scanf(" %49[^\n]", senha.servico);
-        
+
+        while (servicoJaCadastrado(arquivo, senhaMestra, senha.servico))
+        {
+            printf(VERMELHO "\nServico ja cadastrado. Digite outro nome.\n\n" RESET);
+            memset(senha.servico, 0, sizeof(senha.servico));
+
+            printf("Digite o servico: ");
+            scanf(" %49[^\n]", senha.servico);
+        }
+
         printf("Digite o usuário: ");
         scanf(" %49[^\n]", senha.usuario);
 
@@ -161,6 +193,7 @@ while (Icontinuar)
 
         criptografarStruct(&senha, senhaMestra);
 
+        fseek(arquivo, 0, SEEK_END);
         fwrite(&senha,sizeof(GerenciadorSenhas),1,arquivo);
         fflush(arquivo);
 
