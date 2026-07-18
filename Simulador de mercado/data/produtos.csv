@@ -1,0 +1,11 @@
+codigo;nome;categoria;tipo_venda;preco;estoque;unidade;estoque_minimo;peso_kg
+1001;Arroz Tipo 1 5kg;Mercearia;unidade;28.90;60.00;pacote;10.00;5.000
+1002;Feijao Carioca 1kg;Mercearia;unidade;8.49;46.00;pacote;15.00;1.000
+1003;Macarrao Espaguete 500g;Mercearia;unidade;5.99;50.00;pacote;12.00;0.500
+1004;Oleo de Soja 900ml;Mercearia;unidade;7.89;35.00;garrafa;10.00;0.900
+2001;Banana Prata;Hortifruti;peso;6.99;35.50;kg;8.00;1.000
+2002;Maca Gala;Hortifruti;peso;12.99;28.75;kg;6.00;1.000
+2003;Tomate Italiano;Hortifruti;peso;8.99;22.40;kg;5.00;1.000
+3001;Leite Integral 1L;Laticinios;unidade;5.69;80.00;caixa;20.00;1.000
+4001;Pao Frances;Padaria;peso;14.99;12.80;kg;3.00;1.000
+5001;Agua Mineral 1.5L;Bebidas;unidade;3.99;100.00;garrafa;25.00;1.500
