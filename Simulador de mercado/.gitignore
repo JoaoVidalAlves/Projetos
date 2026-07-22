@@ -1,2 +1,66 @@
-programa.exe
-.vs\
+# ===========================
+# Visual Studio
+# ===========================
+
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.opendb
+
+# ===========================
+# Build outputs
+# ===========================
+
+Debug/
+Release/
+x64/
+x86/
+bin/
+obj/
+
+# ===========================
+# Compilação C/C++
+# ===========================
+
+*.obj
+*.o
+*.exe
+*.dll
+*.lib
+*.exp
+*.pdb
+*.ilk
+*.idb
+*.ipdb
+*.iobj
+
+# ===========================
+# Logs
+# ===========================
+
+*.log
+
+# ===========================
+# Cache
+# ===========================
+
+*.cache
+*.tlog
+
+# ===========================
+# CMake (caso utilize futuramente)
+# ===========================
+
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+Makefile
+
+# ===========================
+# Outros temporários
+# ===========================
+
+*.tmp
+*.temp
