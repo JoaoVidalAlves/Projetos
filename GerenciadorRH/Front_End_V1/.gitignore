@@ -1,19 +1,6 @@
-# Node
-node_modules/
-dist/
-
-# Visual Studio
-.vs/
-*.user
-*.suo
-
-# Logs
-*.log
-
-# Sistema operacional
-.DS_Store
-Thumbs.db
-
-# Variáveis de ambiente
+node_modules
+dist
 .env
 .env.local
+*.log
+.vs/
